@@ -9,6 +9,7 @@ import {
     calculateNextRevision,
     updateStreak,
     checkAchievements,
+    checkAchievementsFromCounts,
     todayISO,
 } from '../utils/xp.js';
 
@@ -296,53 +297,5 @@ router.post('/:id/revise', validateObjectId, async (req, res) => {
     }
 });
 
-// ── POST /api/questions/import ────────────────────────────────────────────────
-// Bulk import — replaces all questions for the user (like the localStorage importData)
-router.post('/import', async (req, res) => {
-    try {
-        const { questions } = req.body;
-        if (!Array.isArray(questions)) {
-            return res.status(400).json({ message: 'questions must be an array' });
-        }
-
-        const userId = req.user._id;
-
-        // Delete all existing questions for this user
-        await Question.deleteMany({ userId });
-
-        // Insert new ones
-        if (questions.length > 0) {
-            const docs = questions.map((q) => ({
-                userId,
-                name: q.name,
-                url: q.url || '',
-                platform: q.platform,
-                difficulty: q.difficulty,
-                tags: q.tags || [],
-                approachSummary: q.approachSummary || '',
-                optimalApproach: q.optimalApproach || '',
-                timeComplexity: q.timeComplexity || '',
-                spaceComplexity: q.spaceComplexity || '',
-                confidence: q.confidence,
-                mistakeNotes: q.mistakeNotes || '',
-                lastRevised: q.lastRevised || '',
-                nextRevision: q.nextRevision || calculateNextRevision(q.confidence),
-                revisionHistory: q.revisionHistory || [],
-                xpEarned: q.xpEarned || 0,
-                createdAt: q.createdAt ? new Date(q.createdAt) : new Date(),
-            }));
-            await Question.insertMany(docs, { ordered: false });
-        }
-
-        const saved = await Question.find({ userId }).sort({ createdAt: -1 });
-        res.json({
-            message: `Imported ${saved.length} questions`,
-            questions: saved.map(formatQuestion),
-        });
-    } catch (err) {
-        console.error('Import error:', err);
-        res.status(500).json({ message: 'Failed to import questions' });
-    }
-});
-
 export default router;
+

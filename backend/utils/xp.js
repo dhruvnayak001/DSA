@@ -66,18 +66,32 @@ export function checkAchievements(stats, questions) {
         (q) => q.confidence === 5 && q.tags.some((t) => t.toLowerCase().includes('dynamic'))
     ).length;
 
+    checkAchievementsFromCounts(stats, total, mastered, dpMastered);
+}
+
+/**
+ * Checks and unlocks achievements using pre-computed counts.
+ * Avoids fetching all question documents (N+1 query) when counts are already known.
+ * Mutates stats.achievements in-place.
+ * @param {object} stats        - user stats subdocument
+ * @param {number} total        - total question count for the user
+ * @param {number} mastered     - count of questions with confidence === 5
+ * @param {number} dpMastered   - count of DP questions with confidence === 5
+ */
+export function checkAchievementsFromCounts(stats, total, mastered, dpMastered) {
     for (const ach of stats.achievements) {
         if (ach.unlockedAt) continue;
         let unlock = false;
-        if (ach.condition === 'questions >= 1'  && total >= 1)           unlock = true;
-        if (ach.condition === 'questions >= 10' && total >= 10)          unlock = true;
-        if (ach.condition === 'questions >= 50' && total >= 50)          unlock = true;
-        if (ach.condition === 'questions >= 100' && total >= 100)        unlock = true;
-        if (ach.condition === 'streak >= 7'     && stats.currentStreak >= 7)  unlock = true;
-        if (ach.condition === 'streak >= 30'    && stats.currentStreak >= 30) unlock = true;
-        if (ach.condition === 'mastered >= 10'  && mastered >= 10)       unlock = true;
-        if (ach.condition === 'mastered >= 50'  && mastered >= 50)       unlock = true;
-        if (ach.condition === 'dp_mastered >= 10' && dpMastered >= 10)   unlock = true;
+        if (ach.condition === 'questions >= 1'    && total >= 1)                  unlock = true;
+        if (ach.condition === 'questions >= 10'   && total >= 10)                 unlock = true;
+        if (ach.condition === 'questions >= 50'   && total >= 50)                 unlock = true;
+        if (ach.condition === 'questions >= 100'  && total >= 100)                unlock = true;
+        if (ach.condition === 'streak >= 7'       && stats.currentStreak >= 7)   unlock = true;
+        if (ach.condition === 'streak >= 30'      && stats.currentStreak >= 30)  unlock = true;
+        if (ach.condition === 'mastered >= 10'    && mastered >= 10)              unlock = true;
+        if (ach.condition === 'mastered >= 50'    && mastered >= 50)              unlock = true;
+        if (ach.condition === 'dp_mastered >= 10' && dpMastered >= 10)           unlock = true;
         if (unlock) ach.unlockedAt = new Date();
     }
 }
+
