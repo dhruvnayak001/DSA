@@ -97,12 +97,14 @@ export function useQuestions() {
         }
     }, []);
 
-    const resetAll = useCallback(async (): Promise<void> => {
+    const resetAll = useCallback(async (): Promise<UserStats | null> => {
         try {
-            await questionsApi.importQuestions([]);
+            const result = await questionsApi.resetAll();
             setQuestions([]);
+            return result.stats;
         } catch {
-            toast.error('Failed to reset questions');
+            toast.error('Failed to reset data');
+            return null;
         }
     }, []);
 

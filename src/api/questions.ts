@@ -15,6 +15,11 @@ export interface ImportResponse {
     questions: DSAQuestion[];
 }
 
+export interface ResetResponse {
+    message: string;
+    stats: import('@/types/types').UserStats;
+}
+
 export const questionsApi = {
     getAll: async (): Promise<DSAQuestion[]> => {
         const { data } = await apiClient.get<DSAQuestion[]>('/questions');
@@ -47,6 +52,11 @@ export const questionsApi = {
 
     importQuestions: async (questions: DSAQuestion[]): Promise<ImportResponse> => {
         const { data } = await apiClient.post<ImportResponse>('/questions/import', { questions });
+        return data;
+    },
+
+    resetAll: async (): Promise<ResetResponse> => {
+        const { data } = await apiClient.post<ResetResponse>('/questions/reset');
         return data;
     },
 };

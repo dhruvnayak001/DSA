@@ -297,5 +297,42 @@ router.post('/:id/revise', validateObjectId, async (req, res) => {
     }
 });
 
+// ── POST /api/questions/reset ─────────────────────────────────────────────────
+// Reset all data: deletes all questions and resets user stats completely.
+router.post('/reset', async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Delete all questions
+        await Question.deleteMany({ userId });
+
+        // Reset user stats
+        const user = await User.findById(userId);
+        if (user) {
+            user.stats.totalXP = 0;
+            user.stats.level = 1;
+            user.stats.currentStreak = 0;
+            user.stats.longestStreak = 0;
+            user.stats.lastRevisionDate = '';
+            
+            // Reset all achievements
+            for (const ach of user.stats.achievements) {
+                ach.unlockedAt = null;
+            }
+
+            user.markModified('stats');
+            await user.save();
+        }
+
+        res.json({
+            message: 'All data reset successfully',
+            stats: user ? user.stats : null,
+        });
+    } catch (err) {
+        console.error('Reset error:', err);
+        res.status(500).json({ message: 'Failed to reset data' });
+    }
+});
+
 export default router;
 

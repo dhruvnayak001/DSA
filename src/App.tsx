@@ -84,8 +84,9 @@ function AppContent() {
     }, [importQuestions, refresh]);
 
     const handleReset = useCallback(async () => {
-        await resetAll();
-    }, [resetAll]);
+        const resetStats = await resetAll();
+        if (resetStats) setStatsDirectly(resetStats);
+    }, [resetAll, setStatsDirectly]);
 
     // Effective stats: prefer live stats, fall back to user.stats from login
     const effectiveStats = stats ?? user?.stats ?? {
