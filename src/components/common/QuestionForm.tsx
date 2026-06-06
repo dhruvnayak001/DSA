@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 interface QuestionFormProps {
     open: boolean;
     onClose: () => void;
-    onSubmit: (data: QuestionFormData) => boolean;
+    onSubmit: (data: QuestionFormData) => boolean | Promise<boolean>;
     editQuestion?: DSAQuestion | null;
 }
 
@@ -73,14 +73,14 @@ export function QuestionForm({ open, onClose, onSubmit, editQuestion }: Question
         return Object.keys(e).length === 0;
     }
 
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!validate()) {
             toast.error('Please fix the errors before submitting.');
             return;
         }
         setLoading(true);
-        const success = onSubmit(form);
+        const success = await onSubmit(form);
         setLoading(false);
         if (success) onClose();
     }

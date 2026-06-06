@@ -1,64 +1,110 @@
-Welcome to Your Miaoda Project
-Project Info
-Project Directory
-├── README.md # Documentation
-├── components.json # Component library configuration
-├── index.html # Entry file
-├── package.json # Package management
-├── postcss.config.js # PostCSS configuration
-├── public # Static resources directory
-│   ├── favicon.png # Icon
-│   └── images # Image resources
-├── src # Source code directory
-│   ├── App.tsx # Entry file
-│   ├── components # Components directory
-│   ├── context # Context directory
-│   ├── db # Database configuration directory
-│   ├── hooks # Common hooks directory
-│   ├── index.css # Global styles
-│   ├── layout # Layout directory
-│   ├── lib # Utility library directory
-│   ├── main.tsx # Entry file
-│   ├── routes.tsx # Routing configuration
-│   ├── pages # Pages directory
-│   ├── services # Database interaction directory
-│   ├── types # Type definitions directory
-├── tsconfig.app.json # TypeScript frontend configuration file
-├── tsconfig.json # TypeScript configuration file
-├── tsconfig.node.json # TypeScript Node.js configuration file
-└── vite.config.ts # Vite configuration file
-Tech Stack
-Vite, TypeScript, React, Supabase
+<div align="center">
+  <h1>🚀 DSA Tracker</h1>
+  <p>A full-stack application to track your Data Structures and Algorithms progress.</p>
+</div>
 
-Development Guidelines
-How to edit code locally?
-You can choose VSCode or any IDE you prefer. The only requirement is to have Node.js and npm installed.
+## 📖 Overview
 
-Environment Requirements
-# Node.js ≥ 20
-# npm ≥ 10
-Example:
-# node -v   # v20.18.3
-# npm -v    # 10.8.2
-Installing Node.js on Windows
-# Step 1: Visit the Node.js official website: https://nodejs.org/, click download. The website will automatically suggest a suitable version (32-bit or 64-bit) for your system.
-# Step 2: Run the installer: Double-click the downloaded installer to run it.
-# Step 3: Complete the installation: Follow the installation wizard to complete the process.
-# Step 4: Verify installation: Open Command Prompt (cmd) or your IDE terminal, and type `node -v` and `npm -v` to check if Node.js and npm are installed correctly.
-Installing Node.js on macOS
-# Step 1: Using Homebrew (Recommended method): Open Terminal. Type the command `brew install node` and press Enter. If Homebrew is not installed, you need to install it first by running the following command in Terminal:
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-Alternatively, use the official installer: Visit the Node.js official website. Download the macOS .pkg installer. Open the downloaded .pkg file and follow the prompts to complete the installation.
-# Step 2: Verify installation: Open Command Prompt (cmd) or your IDE terminal, and type `node -v` and `npm -v` to check if Node.js and npm are installed correctly.
-After installation, follow these steps:
-# Step 1: Download the code package
-# Step 2: Extract the code package
-# Step 3: Open the code package with your IDE and navigate into the code directory
-# Step 4: In the IDE terminal, run the command to install dependencies: npm i
-# Step 5: In the IDE terminal, run the command to start the development server: npm run dev -- --host 127.0.0.1
-# Step 6: if step 5 failed, try this command to start the development server: npx vite --host 127.0.0.1
-How to develop backend services?
-Configure environment variables and install relevant dependencies.If you need to use a database, please use the official version of Supabase.
+DSA Tracker is a comprehensive tool designed to help developers monitor and manage their Data Structures and Algorithms practice. Whether you are preparing for coding interviews or just honing your problem-solving skills, this application allows you to track questions, save filters, and visualize your progress effectively.
 
-Learn More
-You can also check the help documentation: Download and Building the app（ https://intl.cloud.baidu.com/en/doc/MIAODA/s/download-and-building-the-app-en）to learn more detailed content.
+## ✨ Features
+
+- **User Authentication**: Secure sign-up and login using JWT.
+- **Problem Tracking**: Log and manage DSA questions you've tackled.
+- **Custom Filters**: Save your preferred filters (e.g., difficulty, topic) for quick access.
+- **Progress Visualization**: Intuitive dashboard to see your performance metrics.
+- **Responsive Design**: Modern and sleek UI accessible on both desktop and mobile devices.
+
+## 🛠️ Tech Stack
+
+**Frontend:**
+- [React](https://reactjs.org/) (v18)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vitejs.dev/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [Radix UI](https://www.radix-ui.com/) & [Framer Motion](https://www.framer.com/motion/)
+
+**Backend:**
+- [Node.js](https://nodejs.org/) & [Express](https://expressjs.com/)
+- [MongoDB Atlas](https://www.mongodb.com/atlas/database) & [Mongoose](https://mongoosejs.com/)
+- [JWT](https://jwt.io/) for Authentication
+
+## 📂 Project Structure
+
+```bash
+├── backend/                # Express & Node.js backend
+│   ├── models/             # Mongoose schemas (User, Question, SavedFilter)
+│   ├── routes/             # API endpoints
+│   ├── controllers/        # Request handling logic
+│   ├── .env.example        # Example environment variables
+│   └── server.js           # Entry point
+├── src/                    # React frontend source code
+│   ├── components/         # Reusable UI components
+│   ├── pages/              # Application views
+│   ├── hooks/              # Custom React hooks
+│   ├── services/           # API interaction layer
+│   ├── index.css           # Global Tailwind styles
+│   └── App.tsx             # Main application component
+├── package.json            # Frontend dependencies
+└── vite.config.ts          # Vite configuration
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Ensure you have the following installed:
+- [Node.js](https://nodejs.org/) (v20 or higher)
+- [npm](https://www.npmjs.com/) (v10 or higher)
+- A [MongoDB Atlas](https://www.mongodb.com/atlas/database) account and cluster.
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repo-url>
+   cd DSA
+   ```
+
+2. **Setup Backend:**
+   Navigate to the backend directory, install dependencies, and configure environment variables.
+   ```bash
+   cd backend
+   npm install
+   cp .env.example .env
+   ```
+   *Open the `.env` file and fill in your `MONGODB_URI` and `JWT_SECRET`.*
+
+3. **Setup Frontend:**
+   Open a new terminal, navigate to the root directory, and install dependencies.
+   ```bash
+   npm install
+   ```
+
+### Running the Application
+
+1. **Start the Backend Server:**
+   ```bash
+   cd backend
+   npm run dev
+   ```
+   *The backend will run on `http://localhost:5000`.*
+
+2. **Start the Frontend Development Server:**
+   ```bash
+   npm run dev
+   ```
+   *The frontend will run on `http://localhost:5173`.*
+
+## 🔒 Environment Variables
+
+**Backend (`backend/.env`):**
+- `PORT` - Port for the backend server (default: 5000)
+- `MONGODB_URI` - Your MongoDB Atlas connection string
+- `JWT_SECRET` - Secret key for JWT authentication
+- `JWT_EXPIRES_IN` - Token expiration time (e.g., `7d`)
+- `CLIENT_URL` - Allowed CORS origin (e.g., `http://localhost:5173`)
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the issues page.

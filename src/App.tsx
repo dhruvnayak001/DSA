@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Toaster } from '@/components/ui/sonner';
+import { Loader2 } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layouts/Layout';
-import { Dashboard } from '@/pages/Dashboard';
-import { QuestionBank } from '@/pages/QuestionBank';
-import { RevisionQueue } from '@/pages/RevisionQueue';
-import { Analytics } from '@/pages/Analytics';
-import { MistakeIntelligence } from '@/pages/MistakeIntelligence';
-import { Settings } from '@/pages/Settings';
-import { Login } from '@/pages/Login';
+import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useQuestions } from '@/hooks/useQuestions';
-import { useTheme } from '@/hooks/useTheme';
 import { useStats } from '@/hooks/useStats';
+import { useTheme } from '@/hooks/useTheme';
+import { Analytics } from '@/pages/Analytics';
+import { Dashboard } from '@/pages/Dashboard';
+import { Login } from '@/pages/Login';
+import { MistakeIntelligence } from '@/pages/MistakeIntelligence';
+import { QuestionBank } from '@/pages/QuestionBank';
+import { RevisionQueue } from '@/pages/RevisionQueue';
+import { Settings } from '@/pages/Settings';
 import type { DSAQuestion, UserStats } from '@/types/types';
-import { Loader2 } from 'lucide-react';
 
 // ── Auth Guard ────────────────────────────────────────────────────────────────
 function RequireAuth({ children }: { children: React.ReactNode }) {

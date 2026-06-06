@@ -49,11 +49,11 @@ import { toast } from 'sonner';
 
 interface QuestionBankProps {
     questions: DSAQuestion[];
-    onAdd: (data: QuestionFormData) => boolean;
-    onUpdate: (q: DSAQuestion) => void;
-    onDelete: (id: string, name: string) => void;
-    onDuplicate: (id: string) => void;
-    onMarkRevised: (id: string) => void;
+    onAdd: (data: QuestionFormData) => boolean | Promise<boolean>;
+    onUpdate: (q: DSAQuestion) => Promise<void> | void;
+    onDelete: (id: string, name: string) => Promise<void> | void;
+    onDuplicate: (id: string) => Promise<void> | void;
+    onMarkRevised: (id: string, confidence?: number) => Promise<void> | void;
     addFormOpen: boolean;
     setAddFormOpen: (v: boolean) => void;
 }
