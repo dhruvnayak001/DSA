@@ -1,64 +1,186 @@
-Welcome to Your Miaoda Project
-Project Info
-Project Directory
-├── README.md # Documentation
-├── components.json # Component library configuration
-├── index.html # Entry file
-├── package.json # Package management
-├── postcss.config.js # PostCSS configuration
-├── public # Static resources directory
-│   ├── favicon.png # Icon
-│   └── images # Image resources
-├── src # Source code directory
-│   ├── App.tsx # Entry file
-│   ├── components # Components directory
-│   ├── context # Context directory
-│   ├── db # Database configuration directory
-│   ├── hooks # Common hooks directory
-│   ├── index.css # Global styles
-│   ├── layout # Layout directory
-│   ├── lib # Utility library directory
-│   ├── main.tsx # Entry file
-│   ├── routes.tsx # Routing configuration
-│   ├── pages # Pages directory
-│   ├── services # Database interaction directory
-│   ├── types # Type definitions directory
-├── tsconfig.app.json # TypeScript frontend configuration file
-├── tsconfig.json # TypeScript configuration file
-├── tsconfig.node.json # TypeScript Node.js configuration file
-└── vite.config.ts # Vite configuration file
-Tech Stack
-Vite, TypeScript, React, Supabase
+# 🎯 DSA Revision Tracker Pro
 
-Development Guidelines
-How to edit code locally?
-You can choose VSCode or any IDE you prefer. The only requirement is to have Node.js and npm installed.
+> A full-stack spaced-repetition system to help you **master Data Structures & Algorithms** — not just memorize them.
 
-Environment Requirements
-# Node.js ≥ 20
-# npm ≥ 10
-Example:
-# node -v   # v20.18.3
-# npm -v    # 10.8.2
-Installing Node.js on Windows
-# Step 1: Visit the Node.js official website: https://nodejs.org/, click download. The website will automatically suggest a suitable version (32-bit or 64-bit) for your system.
-# Step 2: Run the installer: Double-click the downloaded installer to run it.
-# Step 3: Complete the installation: Follow the installation wizard to complete the process.
-# Step 4: Verify installation: Open Command Prompt (cmd) or your IDE terminal, and type `node -v` and `npm -v` to check if Node.js and npm are installed correctly.
-Installing Node.js on macOS
-# Step 1: Using Homebrew (Recommended method): Open Terminal. Type the command `brew install node` and press Enter. If Homebrew is not installed, you need to install it first by running the following command in Terminal:
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-Alternatively, use the official installer: Visit the Node.js official website. Download the macOS .pkg installer. Open the downloaded .pkg file and follow the prompts to complete the installation.
-# Step 2: Verify installation: Open Command Prompt (cmd) or your IDE terminal, and type `node -v` and `npm -v` to check if Node.js and npm are installed correctly.
-After installation, follow these steps:
-# Step 1: Download the code package
-# Step 2: Extract the code package
-# Step 3: Open the code package with your IDE and navigate into the code directory
-# Step 4: In the IDE terminal, run the command to install dependencies: npm i
-# Step 5: In the IDE terminal, run the command to start the development server: npm run dev -- --host 127.0.0.1
-# Step 6: if step 5 failed, try this command to start the development server: npx vite --host 127.0.0.1
-How to develop backend services?
-Configure environment variables and install relevant dependencies.If you need to use a database, please use the official version of Supabase.
+Built with **React + TypeScript** on the frontend and **Node.js + Express + MongoDB Atlas** on the backend, deployed on Vercel.
 
-Learn More
-You can also check the help documentation: Download and Building the app（ https://intl.cloud.baidu.com/en/doc/MIAODA/s/download-and-building-the-app-en）to learn more detailed content.
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| 📚 **Question Bank** | Add, edit, duplicate, and organize DSA problems with platform tags, difficulty, and approach notes |
+| 🔁 **Spaced Repetition** | Smart revision scheduling based on confidence level — problems resurface exactly when you're about to forget them |
+| 📊 **Analytics** | Visual breakdowns of your performance across difficulty, topic, and platform |
+| 🧠 **Mistake Intelligence** | Track mistake patterns and weak spots to focus your revision where it matters most |
+| 🔥 **Streak & XP System** | Gamified progression with daily streaks, XP points, level-ups, and unlockable achievements |
+| 📤 **Import / Export** | Backup and restore your entire question bank as JSON |
+| 🔒 **Auth** | JWT-based authentication with secure per-user data isolation |
+
+---
+
+## 🖼️ Pages
+
+- **Dashboard** — Stats overview, due-today list, XP progress, recent revisions, and achievements
+- **Question Bank** — Full CRUD with search, filters, and bulk import
+- **Revision Queue** — Focused revision mode with confidence rating (1–5)
+- **Analytics** — Charts for confidence distribution, revision history, and tag breakdown
+- **Mistake Intelligence** — AI-style pattern detection on your weakest questions
+- **Settings** — Profile, data export/import, and reset
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend**
+- React 18 + TypeScript
+- Vite (Rolldown)
+- Tailwind CSS + shadcn/ui (Radix UI)
+- Framer Motion for animations
+- React Hook Form + Zod for validation
+- Recharts / Chart.js for data visualization
+- React Router v7
+
+**Backend**
+- Node.js + Express
+- MongoDB Atlas + Mongoose
+- JWT authentication (jsonwebtoken + bcryptjs)
+- REST API with full CRUD + `/revise`, `/duplicate`, `/import`, `/reset` endpoints
+
+**DevOps**
+- Vercel (frontend deployment)
+- CORS with multi-origin support
+- Environment-based config (`.env`)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js ≥ 20
+- npm ≥ 10
+- MongoDB Atlas account
+
+### Frontend
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+```
+
+### Backend
+
+```bash
+cd backend
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# → Fill in MONGO_URI, JWT_SECRET, CLIENT_URL
+
+# Start dev server
+npm run dev
+```
+
+### Environment Variables
+
+**Root `.env`**
+```
+VITE_API_URL=http://localhost:5000/api
+```
+
+**`backend/.env`**
+```
+MONGO_URI=your_mongodb_atlas_connection_string
+JWT_SECRET=your_jwt_secret
+CLIENT_URL=http://localhost:5173
+PORT=5000
+NODE_ENV=development
+```
+
+---
+
+## 📡 API Overview
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/questions` | Fetch all questions for the logged-in user |
+| `POST` | `/api/questions` | Add a new question |
+| `PUT` | `/api/questions/:id` | Update a question |
+| `DELETE` | `/api/questions/:id` | Delete a question |
+| `POST` | `/api/questions/:id/duplicate` | Duplicate a question |
+| `POST` | `/api/questions/:id/revise` | Mark as revised with a confidence score (1–5) |
+| `POST` | `/api/questions/import` | Bulk import (replaces all existing data) |
+| `POST` | `/api/questions/reset` | Reset all questions and stats |
+| `GET` | `/api/stats` | Get XP, streak, level, and achievements |
+| `GET` | `/api/health` | Health check |
+
+All routes (except `/auth`) require a valid `Authorization: Bearer <token>` header.
+
+---
+
+## 🧩 Project Structure
+
+```
+DSA/
+├── src/
+│   ├── api/            # Axios API client & typed endpoints
+│   ├── components/     # Shared UI components (shadcn/ui + custom)
+│   ├── contexts/       # React context providers
+│   ├── hooks/          # Custom hooks (animated counter, auth, etc.)
+│   ├── pages/          # Route-level pages
+│   │   ├── Dashboard.tsx
+│   │   ├── QuestionBank.tsx
+│   │   ├── RevisionQueue.tsx
+│   │   ├── Analytics.tsx
+│   │   ├── MistakeIntelligence.tsx
+│   │   └── Settings.tsx
+│   ├── services/       # Business logic / data services
+│   ├── types/          # Shared TypeScript types
+│   └── utils/          # Helpers (confidence labels, date formatting, etc.)
+└── backend/
+    ├── config/         # DB connection
+    ├── middleware/      # JWT auth middleware
+    ├── models/         # Mongoose schemas (User, Question)
+    ├── routes/         # Express route handlers
+    └── utils/          # XP, streak, and achievement logic
+```
+
+---
+
+## 📈 Spaced Repetition Logic
+
+When you revise a question and rate your confidence (1–5), the backend calculates the **next revision date** using a spaced repetition algorithm:
+
+- **Confidence 1** → review in 1 day
+- **Confidence 2** → review in 3 days
+- **Confidence 3** → review in 7 days
+- **Confidence 4** → review in 14 days
+- **Confidence 5 (Mastered)** → review in 30 days
+
+Each revision also awards **XP**, updates your **streak**, and checks for **achievement unlocks**.
+
+---
+
+## 🏆 Gamification
+
+- **XP System** — Earn XP for adding questions, completing revisions, and mastering problems
+- **Levels** — Progress through levels as your XP grows
+- **Streaks** — Maintain daily revision streaks (tracked and stored per user)
+- **Achievements** — Unlock badges for milestones (e.g., first question, 10 mastered, DP expert)
+
+---
+
+## 📄 License
+
+MIT
+
+---
+
+<p align="center">Built with ❤️ to make DSA prep actually stick.</p>
