@@ -25,17 +25,17 @@ export function useQuestions() {
         refresh();
     }, [refresh]);
 
-    const addQuestion = useCallback(async (data: QuestionFormData): Promise<boolean> => {
+    const addQuestion = useCallback(async (data: QuestionFormData): Promise<{ success: boolean; stats: UserStats | null }> => {
         try {
-            const newQ = await questionsApi.add(data);
-            setQuestions((prev) => [newQ, ...prev]);
-            toast.success('Question added!', { description: `"${newQ.name}" has been tracked.` });
-            return true;
+            const { question, stats } = await questionsApi.add(data);
+            setQuestions((prev) => [question, ...prev]);
+            toast.success('Question added!', { description: `"${question.name}" has been tracked.` });
+            return { success: true, stats };
         } catch (err: unknown) {
             const msg = (err as { response?: { data?: { message?: string } } })
                 ?.response?.data?.message ?? 'Failed to add question';
             toast.error(msg);
-            return false;
+            return { success: false, stats: null };
         }
     }, []);
 

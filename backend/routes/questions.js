@@ -10,6 +10,8 @@ import {
     updateStreak,
     checkAchievements,
     checkAchievementsFromCounts,
+    checkAndUpdateBadges,
+    gatherBadgeCounts,
     todayISO,
 } from '../utils/xp.js';
 
@@ -93,16 +95,33 @@ router.post('/', async (req, res) => {
 
         // Update user stats (use count to avoid N+1 query for achievements)
         const user = await User.findById(userId);
+        const today = todayISO();
+
+        // Streak: solving a problem counts toward your daily streak
+        updateStreak(user.stats, today);
+
         user.stats.totalXP += calculateXP('add');
         user.stats.level = calculateLevel(user.stats.totalXP);
         const totalCount = await Question.countDocuments({ userId });
         const masteredCount = await Question.countDocuments({ userId, confidence: 5 });
         const dpMasteredCount = await Question.countDocuments({ userId, confidence: 5, tags: { $regex: /dynamic/i } });
         checkAchievementsFromCounts(user.stats, totalCount, masteredCount, dpMasteredCount);
+
+        // Check badges
+        const badgeCounts = await gatherBadgeCounts(Question, userId, user.stats);
+        const newlyUnlocked = checkAndUpdateBadges(user.stats, badgeCounts);
+
         user.markModified('stats');
         await user.save();
 
-        res.status(201).json(formatQuestion(question));
+        const response = {
+            question: formatQuestion(question),
+            stats: user.stats,
+        };
+        if (newlyUnlocked.length > 0) {
+            response.newBadges = newlyUnlocked;
+        }
+        res.status(201).json(response);
     } catch (err) {
         if (err.code === 11000) {
             return res.status(409).json({ message: 'A question with this name already exists' });
@@ -280,17 +299,30 @@ router.post('/:id/revise', validateObjectId, async (req, res) => {
         updateStreak(user.stats, today);
         user.stats.totalXP += xpGain;
         user.stats.level = calculateLevel(user.stats.totalXP);
+
+        // Increment total revision count
+        user.stats.totalRevisionsCount = (user.stats.totalRevisionsCount || 0) + 1;
+
         const totalCount = await Question.countDocuments({ userId: req.user._id });
         const masteredCount = await Question.countDocuments({ userId: req.user._id, confidence: 5 });
         const dpMasteredCount = await Question.countDocuments({ userId: req.user._id, confidence: 5, tags: { $regex: /dynamic/i } });
         checkAchievementsFromCounts(user.stats, totalCount, masteredCount, dpMasteredCount);
+
+        // Check badges
+        const badgeCounts = await gatherBadgeCounts(Question, req.user._id, user.stats);
+        const newlyUnlocked = checkAndUpdateBadges(user.stats, badgeCounts);
+
         user.markModified('stats');
         await user.save();
 
-        res.json({
+        const response = {
             question: formatQuestion(question),
             stats: user.stats,
-        });
+        };
+        if (newlyUnlocked.length > 0) {
+            response.newBadges = newlyUnlocked;
+        }
+        res.json(response);
     } catch (err) {
         console.error('Mark revised error:', err);
         res.status(500).json({ message: 'Failed to mark as revised' });
@@ -314,11 +346,16 @@ router.post('/reset', async (req, res) => {
             user.stats.currentStreak = 0;
             user.stats.longestStreak = 0;
             user.stats.lastRevisionDate = '';
+            user.stats.totalRevisionsCount = 0;
+            user.stats.totalDaysActive = 0;
             
             // Reset all achievements
             for (const ach of user.stats.achievements) {
                 ach.unlockedAt = null;
             }
+
+            // Reset all badges
+            user.stats.badges = [];
 
             user.markModified('stats');
             await user.save();
@@ -335,4 +372,3 @@ router.post('/reset', async (req, res) => {
 });
 
 export default router;
-

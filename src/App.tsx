@@ -14,6 +14,8 @@ import { MistakeIntelligence } from '@/pages/MistakeIntelligence';
 import { QuestionBank } from '@/pages/QuestionBank';
 import { RevisionQueue } from '@/pages/RevisionQueue';
 import { Settings } from '@/pages/Settings';
+import { BadgesAndStreaks } from '@/pages/BadgesAndStreaks';
+import { Leaderboard } from '@/pages/Leaderboard';
 import type { DSAQuestion, UserStats } from '@/types/types';
 
 // ── Auth Guard ────────────────────────────────────────────────────────────────
@@ -78,6 +80,12 @@ function AppContent() {
         if (newStats) setStatsDirectly(newStats);
     }, [markRevised, setStatsDirectly]);
 
+    const handleAddQuestion = useCallback(async (data: QuestionFormData) => {
+        const res = await addQuestion(data);
+        if (res.stats) setStatsDirectly(res.stats);
+        return res.success;
+    }, [addQuestion, setStatsDirectly]);
+
     const handleImport = useCallback(async (qs: DSAQuestion[]) => {
         await importQuestions(qs);
         await refresh();
@@ -92,6 +100,7 @@ function AppContent() {
     const effectiveStats = stats ?? user?.stats ?? {
         currentStreak: 0, longestStreak: 0, lastRevisionDate: '',
         totalXP: 0, level: 1, achievements: [],
+        totalRevisionsCount: 0, totalDaysActive: 0, badges: [],
     };
 
     return (
@@ -119,7 +128,7 @@ function AppContent() {
                     element={
                         <QuestionBank
                             questions={questions}
-                            onAdd={addQuestion}
+                            onAdd={handleAddQuestion}
                             onUpdate={updateQuestion}
                             onDelete={deleteQuestion}
                             onDuplicate={duplicateQuestion}
@@ -146,6 +155,14 @@ function AppContent() {
                 <Route
                     path="/mistakes"
                     element={<MistakeIntelligence questions={questions} />}
+                />
+                <Route
+                    path="/badges"
+                    element={<BadgesAndStreaks />}
+                />
+                <Route
+                    path="/leaderboard"
+                    element={<Leaderboard />}
                 />
                 <Route
                     path="/settings"

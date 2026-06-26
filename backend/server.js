@@ -7,7 +7,8 @@ import questionRoutes from './routes/questions.js';
 import statsRoutes from './routes/stats.js';
 import settingsRoutes from './routes/settings.js';
 import filterRoutes from './routes/filters.js';
-
+import badgeRoutes from './routes/badges.js';
+import leaderboardRoutes from './routes/leaderboard.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -38,7 +39,8 @@ app.use('/api/questions', questionRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/filters', filterRoutes);
-
+app.use('/api/badges', badgeRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });

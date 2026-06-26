@@ -10,6 +10,20 @@ const achievementSchema = new mongoose.Schema({
     condition: { type: String, required: true },
 }, { _id: false });
 
+// ── Badge sub-schema ──────────────────────────────────────────────────────────
+const badgeSchema = new mongoose.Schema({
+    id: { type: String, required: true },
+    category: { type: String, enum: ['streak', 'volume', 'mastery', 'consistency', 'special'], required: true },
+    tier: { type: String, enum: ['bronze', 'silver', 'gold', 'platinum'], required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    icon: { type: String, required: true },
+    unlockedAt: { type: Date, default: null },
+    progress: { type: Number, default: 0 },
+    target: { type: Number, default: 0 },
+    current: { type: Number, default: 0 },
+}, { _id: false });
+
 // ── Stats sub-schema ─────────────────────────────────────────────────────────
 const statsSchema = new mongoose.Schema({
     currentStreak: { type: Number, default: 0 },
@@ -17,6 +31,8 @@ const statsSchema = new mongoose.Schema({
     lastRevisionDate: { type: String, default: '' }, // ISO date "YYYY-MM-DD"
     totalXP: { type: Number, default: 0 },
     level: { type: Number, default: 1 },
+    totalRevisionsCount: { type: Number, default: 0 },
+    totalDaysActive: { type: Number, default: 0 },
     achievements: {
         type: [achievementSchema],
         default: [
@@ -30,6 +46,10 @@ const statsSchema = new mongoose.Schema({
             { id: 'mastered_50', title: 'DSA Expert', description: 'Master 50 problems', icon: '👑', unlockedAt: null, condition: 'mastered >= 50' },
             { id: 'dp_specialist', title: 'DP Specialist', description: 'Master 10 Dynamic Programming problems', icon: '🎓', unlockedAt: null, condition: 'dp_mastered >= 10' },
         ],
+    },
+    badges: {
+        type: [badgeSchema],
+        default: [],
     },
 }, { _id: false });
 

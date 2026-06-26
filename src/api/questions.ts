@@ -5,6 +5,11 @@ export interface RevisePayload {
     confidence: number;
 }
 
+export interface AddResponse {
+    question: DSAQuestion;
+    stats: import('@/types/types').UserStats;
+}
+
 export interface ReviseResponse {
     question: DSAQuestion;
     stats: import('@/types/types').UserStats;
@@ -26,8 +31,8 @@ export const questionsApi = {
         return data;
     },
 
-    add: async (questionData: QuestionFormData): Promise<DSAQuestion> => {
-        const { data } = await apiClient.post<DSAQuestion>('/questions', questionData);
+    add: async (questionData: QuestionFormData): Promise<AddResponse> => {
+        const { data } = await apiClient.post<AddResponse>('/questions', questionData);
         return data;
     },
 

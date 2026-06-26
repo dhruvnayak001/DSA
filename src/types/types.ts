@@ -43,7 +43,10 @@ export interface UserStats {
     lastRevisionDate: string;
     totalXP: number;
     level: number;
+    totalRevisionsCount: number;
+    totalDaysActive: number;
     achievements: Achievement[];
+    badges: Badge[];
 }
 
 export interface Achievement {
@@ -54,6 +57,43 @@ export interface Achievement {
     unlockedAt: string | null;
     condition: string;
 }
+
+// ── Badge System ──────────────────────────────────────────────────────────────
+
+export type BadgeCategory = 'streak' | 'volume' | 'mastery' | 'consistency' | 'special';
+export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
+
+export interface Badge {
+    id: string;
+    category: BadgeCategory;
+    tier: BadgeTier;
+    title: string;
+    description: string;
+    icon: string;
+    unlockedAt: string | null;
+    progress: number;   // 0-100 percentage
+    target: number;
+    current: number;
+}
+
+export interface StreakCalendarDay {
+    date: string;   // "YYYY-MM-DD"
+    count: number;  // number of revisions that day
+}
+
+export interface BadgesResponse {
+    badges: Badge[];
+    stats: {
+        currentStreak: number;
+        longestStreak: number;
+        totalDaysActive: number;
+        totalRevisionsCount: number;
+        totalXP: number;
+        level: number;
+    };
+}
+
+// ── Existing Types ────────────────────────────────────────────────────────────
 
 export interface AppSettings {
     theme: 'light' | 'dark';

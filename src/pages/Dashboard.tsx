@@ -12,6 +12,7 @@ import {
     Calendar,
     ArrowRight,
     Target,
+    Award,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -278,7 +279,7 @@ export function Dashboard({ questions, dueToday, stats }: DashboardProps) {
                     </Card>
                 </motion.div>
 
-                {/* Achievements */}
+                {/* Badges Showcase */}
                 <motion.div
                     initial={{ opacity: 0, x: 16 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -287,30 +288,61 @@ export function Dashboard({ questions, dueToday, stats }: DashboardProps) {
                     <Card className="border-border/50 shadow-card h-full flex flex-col">
                         <CardHeader className="pb-3 pt-4 px-5">
                             <div className="flex items-center justify-between gap-2">
-                                <CardTitle className="text-sm font-semibold text-balance">Achievements</CardTitle>
-                                <Badge variant="secondary" className="text-xs">
-                                    {unlockedAchievements.length}/{stats.achievements.length}
-                                </Badge>
+                                <CardTitle className="text-sm font-semibold text-balance">Badges</CardTitle>
+                                <Link to="/badges">
+                                    <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-primary hover:text-primary">
+                                        View all <ArrowRight className="w-3 h-3" />
+                                    </Button>
+                                </Link>
                             </div>
                         </CardHeader>
                         <CardContent className="px-5 pb-4 flex-1">
-                            <div className="grid grid-cols-3 gap-2">
-                                {stats.achievements.slice(0, 9).map((ach) => (
-                                    <div
-                                        key={ach.id}
-                                        className={cn(
-                                            'flex flex-col items-center gap-1 p-2 rounded-lg border transition-all',
-                                            ach.unlockedAt
-                                                ? 'border-primary/30 bg-primary/5'
-                                                : 'border-border/30 bg-muted/30 opacity-40 grayscale'
-                                        )}
-                                        title={ach.description}
-                                    >
-                                        <span className="text-lg">{ach.icon}</span>
-                                        <p className="text-[10px] font-medium text-center leading-tight text-foreground line-clamp-2">{ach.title}</p>
-                                    </div>
-                                ))}
-                            </div>
+                            {stats.badges && stats.badges.length > 0 ? (
+                                <div className="grid grid-cols-3 gap-2">
+                                    {stats.badges
+                                        .filter((b) => b.unlockedAt)
+                                        .sort((a, b) => new Date(b.unlockedAt!).getTime() - new Date(a.unlockedAt!).getTime())
+                                        .slice(0, 6)
+                                        .map((badge) => (
+                                            <div
+                                                key={badge.id}
+                                                className={cn(
+                                                    'flex flex-col items-center gap-1 p-2 rounded-lg border transition-all',
+                                                    `badge-glow-${badge.tier}`,
+                                                    'badge-shine'
+                                                )}
+                                                title={badge.description}
+                                            >
+                                                <span className="text-lg">{badge.icon}</span>
+                                                <p className="text-[10px] font-medium text-center leading-tight text-foreground line-clamp-2">{badge.title}</p>
+                                            </div>
+                                        ))}
+                                    {stats.badges.filter((b) => b.unlockedAt).length === 0 && (
+                                        <div className="col-span-3 flex flex-col items-center justify-center py-4 text-center">
+                                            <Award className="w-8 h-8 text-muted-foreground/30 mb-2" />
+                                            <p className="text-xs text-muted-foreground">Start revising to earn badges!</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-3 gap-2">
+                                    {stats.achievements.slice(0, 9).map((ach) => (
+                                        <div
+                                            key={ach.id}
+                                            className={cn(
+                                                'flex flex-col items-center gap-1 p-2 rounded-lg border transition-all',
+                                                ach.unlockedAt
+                                                    ? 'border-primary/30 bg-primary/5'
+                                                    : 'border-border/30 bg-muted/30 opacity-40 grayscale'
+                                            )}
+                                            title={ach.description}
+                                        >
+                                            <span className="text-lg">{ach.icon}</span>
+                                            <p className="text-[10px] font-medium text-center leading-tight text-foreground line-clamp-2">{ach.title}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </motion.div>

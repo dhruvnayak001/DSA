@@ -10,6 +10,7 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
     '/revision': { title: 'Revision Queue', subtitle: 'Questions due for revision' },
     '/analytics': { title: 'Analytics', subtitle: 'Visualize your progress' },
     '/mistakes': { title: 'Mistake Intelligence', subtitle: 'Detect patterns in your errors' },
+    '/badges': { title: 'Badges & Streaks', subtitle: 'Track your achievements and consistency' },
     '/settings': { title: 'Settings', subtitle: 'Preferences & data management' },
 };
 

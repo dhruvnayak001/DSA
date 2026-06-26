@@ -13,6 +13,7 @@ import {
     ChevronRight,
     Flame,
     Trophy,
+    Award,
     X,
     LogOut,
     User,
@@ -35,6 +36,8 @@ const NAV_ITEMS = [
     { path: '/revision', label: 'Revision Queue', icon: Clock },
     { path: '/analytics', label: 'Analytics', icon: BarChart3 },
     { path: '/mistakes', label: 'Mistake Intel', icon: Brain },
+    { path: '/badges', label: 'Badges', icon: Award },
+    { path: '/leaderboard', label: 'Leaderboard', icon: Trophy },
     { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -147,12 +150,12 @@ function SidebarContent({
             {!collapsed && (
                 <div className="px-4 py-3 border-t border-sidebar-border">
                     <div className="flex items-center gap-2">
-                        <Trophy className="w-4 h-4 text-warning shrink-0" />
+                        <Award className="w-4 h-4 text-warning shrink-0" />
                         <div className="min-w-0">
                             <p className="text-xs font-medium text-sidebar-accent-foreground truncate">
-                                {stats.achievements.filter((a) => a.unlockedAt).length} / {stats.achievements.length} Achievements
+                                {stats.badges?.filter((b) => b.unlockedAt).length || 0} Badges Earned
                             </p>
-                            <p className="text-[11px] text-sidebar-foreground truncate">Keep revising to unlock!</p>
+                            <p className="text-[11px] text-sidebar-foreground truncate">Keep revising to unlock more!</p>
                         </div>
                     </div>
                 </div>
