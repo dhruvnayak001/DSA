@@ -51,6 +51,7 @@ export function Settings({ theme, onToggleTheme, questionCount, onImport, onRese
     const { user, refreshUser } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [importing, setImporting] = useState(false);
+    const [recalculating, setRecalculating] = useState(false);
     const [migrating, setMigrating] = useState(false);
     const [migrationDone, setMigrationDone] = useState(false);
 
@@ -118,6 +119,22 @@ export function Settings({ theme, onToggleTheme, questionCount, onImport, onRese
             toast.success('All data reset', { description: 'Your tracker has been cleared.' });
         } catch {
             toast.error('Reset failed');
+        }
+    }
+
+    // ── Recalculate stats from revision history ───────────────────────────────
+    async function handleRecalculate() {
+        setRecalculating(true);
+        try {
+            const result = await statsApi.recalculate();
+            await refreshUser();
+            toast.success('Stats recalculated!', {
+                description: `${result.stats.totalDaysActive} active days · ${result.stats.currentStreak} day streak.`,
+            });
+        } catch {
+            toast.error('Recalculate failed');
+        } finally {
+            setRecalculating(false);
         }
     }
 
@@ -286,6 +303,24 @@ export function Settings({ theme, onToggleTheme, questionCount, onImport, onRese
                                 className="hidden"
                                 onChange={handleFileChange}
                             />
+                        </div>
+
+                        <div className="space-y-1.5 mt-1">
+                            <p className="text-xs font-medium text-foreground">Recalculate Stats</p>
+                            <p className="text-xs text-muted-foreground text-pretty">
+                                Recomputes active days and revision count from your real history.{' '}
+                                <span className="text-warning font-medium">Warning: may override a restored streak.</span>
+                            </p>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleRecalculate}
+                                disabled={recalculating}
+                                className="gap-2 h-9"
+                            >
+                                <Database className="w-3.5 h-3.5" />
+                                {recalculating ? 'Recalculating...' : 'Recalculate Stats'}
+                            </Button>
                         </div>
                     </div>
                 </SettingSection>
