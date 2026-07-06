@@ -94,6 +94,7 @@ export function BadgesAndStreaks() {
         streakBeforeBreak: 0,
     });
     const [restoring, setRestoring] = useState(false);
+    const [showRecalcConfirm, setShowRecalcConfirm] = useState(false);
     const [loading, setLoading] = useState(true);
     const [recalculating, setRecalculating] = useState(false);
     const [activeCategory, setActiveCategory] = useState<BadgeCategory | 'all'>('all');
@@ -293,14 +294,45 @@ export function BadgesAndStreaks() {
                                     </div>
                                 </div>
 
-                                {/* Recalculate button */}
+                                {/* Recalculate button — with confirm dialog */}
                                 <button
-                                    onClick={handleRecalculate}
+                                    onClick={() => setShowRecalcConfirm(true)}
                                     disabled={recalculating}
-                                    className="mt-3 text-[11px] text-muted-foreground hover:text-primary underline underline-offset-2 transition-colors disabled:opacity-50"
+                                    className="mt-3 text-[11px] text-muted-foreground hover:text-destructive underline underline-offset-2 transition-colors disabled:opacity-50"
                                 >
                                     {recalculating ? 'Recalculating…' : 'Recalculate stats from history'}
                                 </button>
+
+                                {/* Confirm dialog */}
+                                <Dialog open={showRecalcConfirm} onOpenChange={setShowRecalcConfirm}>
+                                    <DialogContent className="max-w-sm">
+                                        <DialogHeader>
+                                            <DialogTitle className="flex items-center gap-2">
+                                                <span>⚠️</span> Recalculate Stats?
+                                            </DialogTitle>
+                                            <DialogDescription className="text-sm text-muted-foreground pt-1">
+                                                This will recalculate your streak and stats from your actual revision history.
+                                                <br /><br />
+                                                <strong className="text-foreground">Warning:</strong> If you recently used a streak restore, this will override it and your streak may go back to 1.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="flex gap-2 justify-end mt-2">
+                                            <Button variant="outline" size="sm" onClick={() => setShowRecalcConfirm(false)}>
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setShowRecalcConfirm(false);
+                                                    handleRecalculate();
+                                                }}
+                                            >
+                                                Yes, recalculate
+                                            </Button>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
                             </div>
                         </div>
 
