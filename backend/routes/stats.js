@@ -144,4 +144,71 @@ router.patch('/', async (req, res) => {
     }
 });
 
+// ── POST /api/stats/restore-streak ───────────────────────────────────────────
+// Snapchat-style streak restore: 2 restores per calendar month.
+router.post('/restore-streak', async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        const stats = user.stats;
+
+        // ── 1. Auto-reset monthly token counter ───────────────────────────────
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        if (stats.streakRestoresMonth !== currentMonth) {
+            stats.streakRestoresUsed = 0;
+            stats.streakRestoresMonth = currentMonth;
+        }
+
+        // ── 2. Guard: tokens exhausted ────────────────────────────────────────
+        const MAX_RESTORES = 2;
+        if ((stats.streakRestoresUsed || 0) >= MAX_RESTORES) {
+            return res.status(403).json({ message: 'No streak restores left this month. You get 2 per month.' });
+        }
+
+        // ── 3. Guard: nothing to restore ──────────────────────────────────────
+        if (!stats.streakBeforeBreak || stats.streakBeforeBreak === 0) {
+            return res.status(400).json({ message: 'No broken streak to restore.' });
+        }
+
+        // ── 4. Guard: streak is still active (didn't actually break) ──────────
+        const yd = new Date(); yd.setDate(yd.getDate() - 1);
+        const yStr = `${yd.getFullYear()}-${String(yd.getMonth() + 1).padStart(2, '0')}-${String(yd.getDate()).padStart(2, '0')}`;
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+        const last = stats.lastRevisionDate;
+        if (last === today || last === yStr) {
+            return res.status(400).json({ message: 'Your streak is still active — nothing to restore!' });
+        }
+
+        // ── 5. Guard: break is too old (> 48h window) ────────────────────────
+        const dayBeforeYesterday = new Date(); dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2);
+        const dbyStr = `${dayBeforeYesterday.getFullYear()}-${String(dayBeforeYesterday.getMonth() + 1).padStart(2, '0')}-${String(dayBeforeYesterday.getDate()).padStart(2, '0')}`;
+        if (last < dbyStr) {
+            return res.status(400).json({ message: 'Restore window expired. You can only restore within 48 hours of breaking your streak.' });
+        }
+
+        // ── 6. Restore! ───────────────────────────────────────────────────────
+        const restoredStreak = stats.streakBeforeBreak;
+        stats.currentStreak = restoredStreak;
+        stats.lastRevisionDate = yStr;                   // mark yesterday as active to keep streak alive
+        stats.longestStreak = Math.max(restoredStreak, stats.longestStreak || 0);
+        stats.streakBeforeBreak = 0;                     // clear — restore used up
+        stats.streakRestoresUsed = (stats.streakRestoresUsed || 0) + 1;
+        stats.streakRestoresMonth = currentMonth;
+
+        user.markModified('stats');
+        await user.save();
+
+        const statsOut = user.stats.toObject ? user.stats.toObject() : { ...user.stats };
+        res.json({
+            message: `Streak restored to ${restoredStreak} days! 🔥`,
+            stats: statsOut,
+            restoresRemaining: MAX_RESTORES - stats.streakRestoresUsed,
+        });
+    } catch (err) {
+        console.error('Restore streak error:', err);
+        res.status(500).json({ message: 'Failed to restore streak' });
+    }
+});
+
 export default router;

@@ -11,4 +11,9 @@ export const statsApi = {
         const { data } = await apiClient.patch<UserStats>('/stats', partial);
         return data;
     },
+
+    restoreStreak: async (): Promise<{ message: string; stats: UserStats; restoresRemaining: number }> => {
+        const { data } = await apiClient.post<{ message: string; stats: UserStats; restoresRemaining: number }>('/stats/restore-streak');
+        return data;
+    },
 };

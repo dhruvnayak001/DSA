@@ -33,6 +33,9 @@ const statsSchema = new mongoose.Schema({
     level: { type: Number, default: 1 },
     totalRevisionsCount: { type: Number, default: 0 },
     totalDaysActive: { type: Number, default: 0 },
+    streakRestoresUsed: { type: Number, default: 0 },      // tokens used this calendar month
+    streakRestoresMonth: { type: String, default: '' },    // "YYYY-MM" — resets on new month
+    streakBeforeBreak: { type: Number, default: 0 },       // saved streak value just before it broke
     achievements: {
         type: [achievementSchema],
         default: [

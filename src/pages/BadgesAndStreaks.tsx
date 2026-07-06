@@ -15,6 +15,8 @@ import {
     ChevronRight,
     Lock,
     Info,
+    RotateCcw,
+    Shield,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,6 +33,7 @@ import { Progress } from '@/components/ui/progress';
 import { StreakHeatmap } from '@/components/common/StreakHeatmap';
 import { BadgeCard } from '@/components/common/BadgeCard';
 import { badgesApi, statsApi } from '@/api/badges';
+import { statsApi as mainStatsApi } from '@/api/stats';
 import type { Badge, BadgeCategory, BadgeTier, StreakCalendarDay } from '@/types/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -86,7 +89,11 @@ export function BadgesAndStreaks() {
         totalRevisionsCount: 0,
         totalXP: 0,
         level: 1,
+        streakRestoresUsed: 0,
+        streakRestoresMonth: '',
+        streakBeforeBreak: 0,
     });
+    const [restoring, setRestoring] = useState(false);
     const [loading, setLoading] = useState(true);
     const [recalculating, setRecalculating] = useState(false);
     const [activeCategory, setActiveCategory] = useState<BadgeCategory | 'all'>('all');
@@ -96,9 +103,10 @@ export function BadgesAndStreaks() {
     useEffect(() => {
         async function load() {
             try {
-                const [badgesRes, calRes] = await Promise.all([
+                const [badgesRes, calRes, fullStats] = await Promise.all([
                     badgesApi.getAll(),
                     badgesApi.getStreakCalendar(),
+                    mainStatsApi.get(),
                 ]);
                 setBadges(badgesRes.badges);
                 setCalendarData(calRes);
@@ -109,12 +117,12 @@ export function BadgesAndStreaks() {
                 if (badgesRes.stats.totalDaysActive === 0 && activeDaysFromCal > 0) {
                     try {
                         const result = await statsApi.recalculate();
-                        setStreakStats(result.stats);
+                        setStreakStats((prev) => ({ ...prev, ...result.stats }));
                     } catch {
-                        setStreakStats(badgesRes.stats);
+                        setStreakStats((prev) => ({ ...prev, ...badgesRes.stats, ...fullStats }));
                     }
                 } else {
-                    setStreakStats(badgesRes.stats);
+                    setStreakStats((prev) => ({ ...prev, ...badgesRes.stats, ...fullStats }));
                 }
             } catch (err) {
                 console.error('Failed to load badges:', err);
@@ -129,7 +137,7 @@ export function BadgesAndStreaks() {
         setRecalculating(true);
         try {
             const result = await statsApi.recalculate();
-            setStreakStats(result.stats);
+            setStreakStats((prev) => ({ ...prev, ...result.stats }));
             // Reload calendar and badges too
             const [badgesRes, calRes] = await Promise.all([
                 badgesApi.getAll(),
@@ -142,6 +150,30 @@ export function BadgesAndStreaks() {
             toast.error('Failed to recalculate stats');
         } finally {
             setRecalculating(false);
+        }
+    }
+
+    async function handleRestoreStreak() {
+        setRestoring(true);
+        try {
+            const result = await mainStatsApi.restoreStreak();
+            setStreakStats((prev) => ({
+                ...prev,
+                currentStreak: result.stats.currentStreak,
+                longestStreak: result.stats.longestStreak,
+                streakRestoresUsed: result.stats.streakRestoresUsed ?? prev.streakRestoresUsed + 1,
+                streakRestoresMonth: result.stats.streakRestoresMonth ?? prev.streakRestoresMonth,
+                streakBeforeBreak: 0,
+            }));
+            toast.success(`🔥 Streak restored!`, {
+                description: `${result.stats.currentStreak}-day streak is back. ${result.restoresRemaining} restore${result.restoresRemaining === 1 ? '' : 's'} left this month.`,
+                duration: 5000,
+            });
+        } catch (err: unknown) {
+            const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to restore streak';
+            toast.error(msg);
+        } finally {
+            setRestoring(false);
         }
     }
 
@@ -271,6 +303,96 @@ export function BadgesAndStreaks() {
                                 </button>
                             </div>
                         </div>
+
+                        {/* ── Streak Restore Banner ─────────────────────── */}
+                        <AnimatePresence>
+                            {streakStats.currentStreak === 0 && streakStats.streakBeforeBreak > 0 && (() => {
+                                const MAX = 2;
+                                const now = new Date();
+                                const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                                const usedThisMonth = streakStats.streakRestoresMonth === currentMonth
+                                    ? (streakStats.streakRestoresUsed ?? 0)
+                                    : 0;
+                                const remaining = MAX - usedThisMonth;
+                                const canRestore = remaining > 0;
+
+                                return (
+                                    <motion.div
+                                        key="restore-banner"
+                                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                        animate={{ opacity: 1, height: 'auto', marginTop: 20 }}
+                                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                        transition={{ duration: 0.35, ease: 'easeInOut' }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className={cn(
+                                            'relative rounded-xl border p-4 overflow-hidden',
+                                            canRestore
+                                                ? 'border-orange-500/30 bg-gradient-to-r from-orange-500/10 via-red-500/5 to-yellow-500/10'
+                                                : 'border-border/50 bg-muted/30'
+                                        )}>
+                                            {/* Subtle glow */}
+                                            {canRestore && (
+                                                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none" />
+                                            )}
+
+                                            <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                                {/* Icon */}
+                                                <div className={cn(
+                                                    'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0',
+                                                    canRestore ? 'bg-orange-500/15' : 'bg-muted'
+                                                )}>
+                                                    <Shield className={cn('w-5 h-5', canRestore ? 'text-orange-500' : 'text-muted-foreground')} />
+                                                </div>
+
+                                                {/* Text */}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-foreground">
+                                                        {canRestore ? 'Restore your streak? 🔥' : 'No restores left this month'}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                                        {canRestore
+                                                            ? `Your ${streakStats.streakBeforeBreak}-day streak broke. Use a restore to bring it back!`
+                                                            : `You've used both restores this month. Resets on the 1st.`
+                                                        }
+                                                    </p>
+                                                    {/* Token dots */}
+                                                    <div className="flex items-center gap-1.5 mt-2">
+                                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Restores left:</span>
+                                                        {Array.from({ length: MAX }).map((_, i) => (
+                                                            <div
+                                                                key={i}
+                                                                className={cn(
+                                                                    'w-2.5 h-2.5 rounded-full transition-colors',
+                                                                    i < remaining ? 'bg-orange-500' : 'bg-muted-foreground/25'
+                                                                )}
+                                                            />
+                                                        ))}
+                                                        <span className="text-[10px] text-muted-foreground font-medium ml-0.5">{remaining}/{MAX}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Button */}
+                                                <button
+                                                    id="restore-streak-btn"
+                                                    onClick={handleRestoreStreak}
+                                                    disabled={!canRestore || restoring}
+                                                    className={cn(
+                                                        'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex-shrink-0',
+                                                        canRestore && !restoring
+                                                            ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-md hover:shadow-orange-500/25 hover:scale-105 active:scale-95'
+                                                            : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+                                                    )}
+                                                >
+                                                    <RotateCcw className={cn('w-4 h-4', restoring && 'animate-spin')} />
+                                                    {restoring ? 'Restoring…' : 'Restore Streak'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })()}
+                        </AnimatePresence>
                     </CardContent>
                 </Card>
             </motion.div>

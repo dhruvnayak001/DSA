@@ -55,8 +55,12 @@ export function updateStreak(stats, today) {
     const yStr = `${yd.getFullYear()}-${String(yd.getMonth() + 1).padStart(2, '0')}-${String(yd.getDate()).padStart(2, '0')}`;
 
     if (last === yStr) {
+        // Streak continues — clear the "before break" snapshot
         stats.currentStreak += 1;
+        stats.streakBeforeBreak = 0;
     } else {
+        // Streak broke — save old value before resetting
+        stats.streakBeforeBreak = stats.currentStreak;
         stats.currentStreak = 1;
     }
 

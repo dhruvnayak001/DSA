@@ -203,7 +203,7 @@ function updateStreak(stats: UserStats, today: string): void {
 
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yStr = yesterday.toISOString().split('T')[0];
+    const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
 
     if (last === yStr) {
         stats.currentStreak += 1;

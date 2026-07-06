@@ -45,6 +45,9 @@ export interface UserStats {
     level: number;
     totalRevisionsCount: number;
     totalDaysActive: number;
+    streakRestoresUsed: number;    // tokens used this calendar month (max 2)
+    streakRestoresMonth: string;   // "YYYY-MM" — when to reset the counter
+    streakBeforeBreak: number;     // saved streak before it broke (0 if no break)
     achievements: Achievement[];
     badges: Badge[];
 }
