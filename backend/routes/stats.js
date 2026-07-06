@@ -114,7 +114,7 @@ router.post('/recalculate', async (req, res) => {
 });
 
 // ── PATCH /api/stats ──────────────────────────────────────────────────────────
-// Partial update — used for localStorage migration
+// Partial update — used for localStorage migration and manual fixes
 router.patch('/', async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
@@ -125,6 +125,7 @@ router.patch('/', async (req, res) => {
         if (updates.lastRevisionDate !== undefined) user.stats.lastRevisionDate = updates.lastRevisionDate;
         if (updates.totalXP !== undefined) user.stats.totalXP = updates.totalXP;
         if (updates.level !== undefined) user.stats.level = updates.level;
+        if (updates.streakBeforeBreak !== undefined) user.stats.streakBeforeBreak = updates.streakBeforeBreak;
 
         if (Array.isArray(updates.achievements)) {
             for (const incoming of updates.achievements) {
@@ -170,29 +171,25 @@ router.post('/restore-streak', async (req, res) => {
             return res.status(400).json({ message: 'No broken streak to restore.' });
         }
 
-        // ── 4. Guard: streak is still active (didn't actually break) ──────────
+        // ── 4. Guard: current streak already as good or better ────────────────
+        // (handles case where user broke and already re-built a longer streak)
+        if (stats.currentStreak >= stats.streakBeforeBreak) {
+            return res.status(400).json({ message: 'Your current streak is already better than what broke — keep going! 🔥' });
+        }
+
+        // ── 5. Restore! ───────────────────────────────────────────────────────
+        const now2 = new Date();
+        const today = `${now2.getFullYear()}-${String(now2.getMonth() + 1).padStart(2, '0')}-${String(now2.getDate()).padStart(2, '0')}`;
         const yd = new Date(); yd.setDate(yd.getDate() - 1);
         const yStr = `${yd.getFullYear()}-${String(yd.getMonth() + 1).padStart(2, '0')}-${String(yd.getDate()).padStart(2, '0')}`;
-        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-        const last = stats.lastRevisionDate;
-        if (last === today || last === yStr) {
-            return res.status(400).json({ message: 'Your streak is still active — nothing to restore!' });
-        }
-
-        // ── 5. Guard: break is too old (> 48h window) ────────────────────────
-        const dayBeforeYesterday = new Date(); dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2);
-        const dbyStr = `${dayBeforeYesterday.getFullYear()}-${String(dayBeforeYesterday.getMonth() + 1).padStart(2, '0')}-${String(dayBeforeYesterday.getDate()).padStart(2, '0')}`;
-        if (last < dbyStr) {
-            return res.status(400).json({ message: 'Restore window expired. You can only restore within 48 hours of breaking your streak.' });
-        }
-
-        // ── 6. Restore! ───────────────────────────────────────────────────────
         const restoredStreak = stats.streakBeforeBreak;
         stats.currentStreak = restoredStreak;
-        stats.lastRevisionDate = yStr;                   // mark yesterday as active to keep streak alive
+        // Keep lastRevisionDate as today if already revised, otherwise set yesterday
+        // so getValidatedStreak() still considers it alive
+        stats.lastRevisionDate = (stats.lastRevisionDate === today) ? today : yStr;
         stats.longestStreak = Math.max(restoredStreak, stats.longestStreak || 0);
-        stats.streakBeforeBreak = 0;                     // clear — restore used up
+        stats.streakBeforeBreak = 0;                     // clear — restore consumed
         stats.streakRestoresUsed = (stats.streakRestoresUsed || 0) + 1;
         stats.streakRestoresMonth = currentMonth;
 

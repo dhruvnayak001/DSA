@@ -306,7 +306,7 @@ export function BadgesAndStreaks() {
 
                         {/* ── Streak Restore Banner ─────────────────────── */}
                         <AnimatePresence>
-                            {streakStats.currentStreak === 0 && streakStats.streakBeforeBreak > 0 && (() => {
+                            {streakStats.streakBeforeBreak > 0 && streakStats.streakBeforeBreak > streakStats.currentStreak && (() => {
                                 const MAX = 2;
                                 const now = new Date();
                                 const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
